@@ -1,7 +1,9 @@
-import { Controller, Post, Body, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,5 +31,11 @@ export class AuthController {
             statusCode: HttpStatus.OK, 
             message: "success"
         }
+    }
+
+    @Get('/profile')
+    @UseGuards(JwtAuthGuard)
+    getWithAuth(@Req() req){
+        return req.user
     }
 }
