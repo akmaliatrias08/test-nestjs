@@ -1,7 +1,8 @@
-import { Body, Controller, Post, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Post, HttpStatus, Get, Req, UseGuards } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +30,12 @@ export class AuthController {
             statusCode: HttpStatus.OK, 
             message: "success"
         }
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/profile')
+    profile(@Req() req){
+        return req.user
     }
 
 }
