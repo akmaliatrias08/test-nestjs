@@ -24,6 +24,17 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({
+    unique: true
+  })
+  username: string;
+
+  @Column()
+  password: string;
+
+  @Column()
+  salt: string
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
     nullable: false,
