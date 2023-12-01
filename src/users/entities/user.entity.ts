@@ -1,3 +1,4 @@
+import { Notification } from '#/notification/enitities/notification.entity';
 import { Reviews } from '#/reviews/entities/reviews.entity';
 import {
   Entity,
@@ -56,4 +57,10 @@ export class User {
 
   @OneToMany(() => Reviews, (review) => review.psycholog)
   reviews: Reviews[]
+
+  @OneToMany(() => Notification, (notif) => notif.sender)
+  sender: Notification[]
+
+  @OneToMany(() => Notification, (notif) => notif.receiver)
+  receiver: Notification[]
 }

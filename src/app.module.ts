@@ -11,6 +11,7 @@ import * as pino from 'pino';
 // import { SeederModule } from '#/seeder/seeder.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -89,7 +90,7 @@ import { AuthModule } from './auth/auth.module';
           entities: [],
           synchronize: configService.get<string>('env') === 'development',
           autoLoadEntities: true,
-          logging: false,
+          logging: ["query", "error"],
           namingStrategy: new SnakeNamingStrategy(),
         };
       },
@@ -100,6 +101,7 @@ import { AuthModule } from './auth/auth.module';
     HealthModule,
     ReviewsModule,
     AuthModule,
+    NotificationModule,
   ],
 })
 export class AppModule {}
