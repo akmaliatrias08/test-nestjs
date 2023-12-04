@@ -22,8 +22,11 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return this.usersRepository.findAndCount();
+  findAll(page: number = 1, limit: number = 10) {
+    return this.usersRepository.findAndCount({
+      skip: --page * limit, 
+      take: limit
+    });
   }
 
   async findOne(id: string) {

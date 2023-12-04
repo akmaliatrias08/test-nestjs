@@ -60,8 +60,8 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async findAll() {
-    const [data, count] = await this.usersService.findAll();
+  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
+    const [data, count] = await this.usersService.findAll(page, limit);
 
     return {
       data,
