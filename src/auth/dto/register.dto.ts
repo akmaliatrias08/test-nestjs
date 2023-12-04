@@ -5,11 +5,11 @@ export class RegisterDto {
     firstName: string
 
     @IsNotEmpty()
-    lastName: string
+    lastName: string;
 
     @IsNotEmpty()
-    username: string
+    username: string;
 
     @IsNotEmpty()
-    password: string
+    password: string;
 }

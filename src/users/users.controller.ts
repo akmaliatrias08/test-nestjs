@@ -22,6 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { storageProfile } from './helpers/upload_profile';
 import { join } from 'path';
 import { of } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @Controller('users')
@@ -49,7 +50,7 @@ export class UsersController {
   }
   
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async create(@Body() createUserDto: CreateUserDto) {
     return {
       data: await this.usersService.create(createUserDto),
@@ -59,7 +60,7 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     const [data, count] = await this.usersService.findAll(page, limit);
 
@@ -72,7 +73,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return {
       data: await this.usersService.findOne(id),
@@ -82,7 +83,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -95,7 +96,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.usersService.remove(id);
 

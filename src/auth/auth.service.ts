@@ -1,95 +1,87 @@
-import { CreateUserDto } from '#/users/dto/create-user.dto';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
+import * as bcrypt from 'bcrypt';
 import { User } from '#/users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityNotFoundError, Repository } from 'typeorm';
-import { NotFoundError } from 'rxjs';
+import { Repository } from 'typeorm';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-
     constructor(
         @InjectRepository(User)
-        private usersRepository: Repository<User>,
+        private userRepository: Repository<User>,
         private jwtService: JwtService,
     ){}
 
     async register(registerDto: RegisterDto){
         try {
-            //generate the salt 
-            const generateSalt = await bcrypt.genSalt();
+            //generate salt 
+            const saltGenerate = await bcrypt.genSalt()
 
-            //hast password 
-            const hash = await bcrypt.hash(registerDto.password, generateSalt);
+            //hash password 
+            const password = registerDto.password
+            const hash = await bcrypt.hash(password, saltGenerate);
 
             const user = new User
             user.firstName = registerDto.firstName
             user.lastName = registerDto.lastName
             user.username = registerDto.username
-            user.salt = generateSalt
+            user.salt = saltGenerate
             user.password = hash
 
-            const create = await this.usersRepository.insert(user)
+            const createUser = await this.userRepository.insert(user)
 
-            const userCreated =  await this.usersRepository.findOneOrFail({
-                where: { id: create.identifiers[0].id }
+            return await this.userRepository.findOneOrFail({
+                where: {id: createUser.identifiers[0].id}
             })
-
-            const { salt, password, ...result } = userCreated
-            
-            return result
         } catch (e) {
-            if(e instanceof EntityNotFoundError){
-                throw new HttpException({
-                    statusCode: HttpStatus.NOT_FOUND, 
-                    message: "data not found"
-                }, HttpStatus.NOT_FOUND)
-            } else {
-                throw e
-            }
+          throw e  
         }
-
     }
 
     async login(loginDto: LoginDto){
         try {
-            //findByUsername
-            const user = await this.usersRepository.findOneOrFail({
-                where: { username: loginDto.username }
+            //cari data user by username 
+            const userOne = await this.userRepository.findOne({
+                where: {username: loginDto.username}
             })
 
-            if (!user){
-                throw new HttpException({
-                    statusCode: HttpStatus.BAD_REQUEST, 
-                    message: "username not found"
-                }, HttpStatus.BAD_REQUEST)
+            if(!userOne){
+                throw new HttpException(
+                    {
+                      statusCode: HttpStatus.BAD_REQUEST,
+                      error: 'username is invalid',
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
             }
 
-            //is given password valid 
-            const isMatch = await bcrypt.compare(loginDto.password, user.password);
+            //password dari data user sama ga sama loginDto.password
+            const isMatch = await bcrypt.compare(loginDto.password, userOne.password);
 
             if(!isMatch){
-                throw new HttpException({
-                    statusCode: HttpStatus.BAD_REQUEST, 
-                    message: "password not match"
-                }, HttpStatus.BAD_REQUEST)
+                throw new HttpException(
+                    {
+                      statusCode: HttpStatus.BAD_REQUEST,
+                      error: 'password is invalid',
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
             }
 
-            //return jwt token
             const payload = {
-                id: user.id,
-                username: user.username
+                id: userOne.id,
+                username: userOne.username
             }
 
             return {
-                accessToken: this.jwtService.sign(payload)
-            }   
+                access_token: await this.jwtService.signAsync(payload)
+            }
         } catch (e) {
             throw e
         }
+        
     }
 }

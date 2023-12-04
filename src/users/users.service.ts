@@ -41,7 +41,7 @@ export class UsersService {
         throw new HttpException(
           {
             statusCode: HttpStatus.NOT_FOUND,
-            error: 'Data not found',
+            error: 'data not found',
           },
           HttpStatus.NOT_FOUND,
         );
