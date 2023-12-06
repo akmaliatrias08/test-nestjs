@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Res, 
+  Req, 
   Query, 
   Headers
 } from '@nestjs/common';
@@ -70,6 +71,22 @@ export class UsersController {
     )
   }
   
+  @Get('export')
+  @UseGuards(AuthGuard('jwt'))
+  async generatePdfUser(
+    @Res() res: any,
+    @Req() req,
+    @Headers() headers: any
+  ){
+    const pdfBuffer = await this.usersService.generatePdfUser(req.user.id)
+
+    //set header to response 
+    headers['content-type']  = 'application/pdf'
+    headers['content-disposition'] = 'inline; filename=example.pdf'
+
+    res.end(pdfBuffer, 'binary')
+  }
+
   @Post()
   @UseGuards(AuthGuard('jwt'))
   async create(@Body() createUserDto: CreateUserDto) {

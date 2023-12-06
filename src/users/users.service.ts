@@ -30,7 +30,7 @@ export class UsersService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string) { 
     try {
       return await this.usersRepository.findOneOrFail({
         where: {
@@ -250,4 +250,46 @@ export class UsersService {
 
   return pdfBuffer;
 }
+  async generatePdfUser(userLoggedInId: string){
+    const browser = await puppeteer.launch({
+      args: ['--allow-file-access-from-files'], //izin akses file lokal
+    })
+
+     const page = await browser.newPage()
+     const [users] = await this.findAll()
+     const oneUser = await this.findOne(userLoggedInId)
+     const htmlTemplate = `   
+      <html>
+      <head></head>
+      <body>
+      <div>Halo ${oneUser.firstName} ${oneUser.lastName}! Ini Hasil Data Untuk Mu</div>
+        <h1>Table Data User</h1>
+          <table>
+          <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+          </tr>
+          ${
+            users.map((user) => 
+              `<tr>
+                <td>${user.id}</td>
+                <td>${user.firstName}</td>
+                <td>${user.lastName}</td>
+              </tr>`,
+            ).join('')
+          }
+        </table>
+      </body>
+      </html>
+     `
+
+     await page.setContent(htmlTemplate)
+
+     const pdfBuffer = await page.pdf({})
+
+     browser.close()
+
+     return pdfBuffer
+  }
 }
