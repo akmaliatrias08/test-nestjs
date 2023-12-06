@@ -12,12 +12,12 @@ import {
   UseInterceptors,
   UploadedFile,
   Res, 
-  Query
+  Query, 
+  Headers
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from '#/auth/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageProfile } from './helpers/upload_profile';
 import { join } from 'path';
@@ -28,6 +28,27 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('/export/pdf')
+  async generatePdf(
+    @Res() res: any, 
+    @Headers() headers: any, 
+    @Query('date') date: string
+  ){
+    try {
+      const pdfBuffer = await this.usersService.generatePdfFromHtml(date)
+
+      //set the res header 
+      headers['content-type'] = 'application/pdf';
+      headers['content-disposition'] = 'inline; filename=example.pdf'
+
+      //send pdf file to response 
+      res.end(pdfBuffer, 'binary')
+    } catch (error) {
+      console.log("Error generating PDf: ", error)
+      res.status(500).json({ error: error })
+    }
+  }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storageProfile))

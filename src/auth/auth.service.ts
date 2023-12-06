@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import puppeteer from 'puppeteer';
 
 @Injectable()
 export class AuthService {
@@ -84,4 +85,5 @@ export class AuthService {
         }
         
     }
+    
 }
